@@ -6,11 +6,15 @@
   "main": "src/index.tsx",
   "dependencies": {
     "@react-spring/web": "^9.2.3",
+    "@reduxjs/toolkit": "^1.9.0",
+    "@types/uuid": "^8.3.4",
     "antd": "^4.16.2",
     "jotai": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "^4.0.3"
+    "react-redux": "^8.0.5",
+    "react-scripts": "^4.0.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/react": "^17.0.11",
