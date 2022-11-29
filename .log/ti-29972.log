@@ -1,0 +1,17 @@
+[13:46:05.241] Global cache location '/Users/andrzejfricze/Library/Caches/typescript/4.9', safe file path '/opt/homebrew/lib/node_modules/typescript/lib/typingsafelist.json', types map path /opt/homebrew/lib/node_modules/typescript/lib/typesmap.json
+[13:46:05.243] Processing cache location '/Users/andrzejfricze/Library/Caches/typescript/4.9'
+[13:46:05.244] Trying to find '/Users/andrzejfricze/Library/Caches/typescript/4.9/package.json'...
+[13:46:05.245] Loaded content of '/Users/andrzejfricze/Library/Caches/typescript/4.9/package.json': {"private":true,"dependencies":{"types-registry":"^0.1.616"}}
+[13:46:05.245] Loaded content of '/Users/andrzejfricze/Library/Caches/typescript/4.9/package-lock.json'
+[13:46:05.245] Finished processing cache location '/Users/andrzejfricze/Library/Caches/typescript/4.9'
+[13:46:05.246] Process id: 29973
+[13:46:05.246] NPM location: /opt/homebrew/Cellar/node/18.9.1/bin/npm (explicit '--npmLocation' not  provided)
+[13:46:05.246] validateDefaultNpmLocation: false
+[13:46:05.246] Npm config file: /Users/andrzejfricze/Library/Caches/typescript/4.9/package.json
+[13:46:05.246] Updating types-registry npm package...
+[13:46:05.246] Exec: /opt/homebrew/Cellar/node/18.9.1/bin/npm install --ignore-scripts types-registry@latest
+[13:46:05.255]     Failed. stdout:
+    stderr:
+    /bin/sh: /opt/homebrew/Cellar/node/18.9.1/bin/npm: No such file or directory
+    
+[13:46:05.256] Updated types-registry npm package
