@@ -3,7 +3,7 @@ import { CloseOutlined } from '@ant-design/icons'
 import { a, useTransition } from '@react-spring/web'
 import { Radio } from 'antd'
 import { v4 as uuidv4 } from 'uuid';
-import { createSlice, configureStore } from '@reduxjs/toolkit'
+import { createSlice, configureStore, createSelector } from '@reduxjs/toolkit'
 import {
     Provider,
     useSelector as useReduxSelector,
@@ -106,18 +106,20 @@ const FilterView = () => {
 type FilteredType = {
     remove: RemoveFn
 }
-const Filtered = (props: FilteredType) => {
-    const todos = useSelector(state => {
-        const todos = state.todos.todos
-        const filter = state.todos.filter
+const selectTodos = (state: RootState) => state.todos.todos
+const selectFilter = (state: RootState) => state.todos.filter
 
-        if (filter === 'all') return todos
-        else if (filter === 'completed')
-            return todos.filter((item) => item.completed)
-        else if (filter === 'incompleted')
-            return todos.filter((item) => !item.completed)
-        else return todos
-    })
+const todosSelector = createSelector([selectTodos, selectFilter], (todos, filter) => {
+    if (filter === 'all') return todos
+    else if (filter === 'completed')
+        return todos.filter((item) => item.completed)
+    else if (filter === 'incompleted')
+        return todos.filter((item) => !item.completed)
+    else return todos
+})
+
+const Filtered = (props: FilteredType) => {
+    const todos = useSelector(todosSelector)
 
     const transitions = useTransition(todos, {
         keys: (todo) => todo.id,
