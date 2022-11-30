@@ -35,8 +35,7 @@ const initialState: TodosState = {
     todos: [],
 }
 
-const todoAdapter = createEntityAdapter<TodoItem>({
-})
+const todoAdapter = createEntityAdapter<TodoItem>({})
 
 const todosSlice = createSlice({
     name: 'todosList',
