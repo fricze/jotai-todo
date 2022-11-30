@@ -3,5 +3,6 @@ import 'antd/dist/antd.css'
 import './styles.css'
 import App from './App'
 import AppRedux from './AppRedux'
+import AppEntityAdapter from './AppEntityAdapter'
 
-render(<AppRedux />, document.getElementById('root'))
+render(<AppEntityAdapter />, document.getElementById('root'))
