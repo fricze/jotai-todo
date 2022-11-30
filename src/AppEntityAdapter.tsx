@@ -35,6 +35,7 @@ const initialState: TodosState = {
     todos: [],
 }
 
+// auto normalization for the win!
 const todoAdapter = createEntityAdapter<TodoItem>({})
 
 const todosSlice = createSlice({
