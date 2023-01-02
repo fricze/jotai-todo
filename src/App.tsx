@@ -90,15 +90,15 @@ const TodoList = () => {
 
     const add = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const title = e.currentTarget.inputTitle.value
-        e.currentTarget.inputTitle.value = ''
+        const title = e.currentTarget.newTodo.value
+        e.currentTarget.newTodo.value = ''
         setTodos((prev) => [...prev, atom<TodoItem>({ title, completed: false })])
     }
 
     return (
         <form onSubmit={add}>
             <Filter />
-            <input name="inputTitle" placeholder="Type ..." />
+            <input name="newTodo" placeholder="Type ..." />
             <Filtered remove={remove} />
         </form>
     )

@@ -150,7 +150,7 @@ const TodoList = () => {
     return (
         <form onSubmit={add}>
             <FilterView />
-            <input name="inputTitle"
+            <input name="newTodo"
                 placeholder="Type ..."
                 value={title}
                 onChange={e => setTitle(e.target.value)} />
