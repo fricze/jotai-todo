@@ -5,23 +5,27 @@ import clamp from 'lodash.clamp'
 import swap from 'lodash-move'
 import { PrimitiveAtom, useAtom } from 'jotai'
 
-const fn =
-  (order: number[], active = false, originalIndex = 0, curIndex = 0, y = 0) => (index: number) =>
-    active && index === originalIndex
-      ? {
-        y: curIndex * 40 + y,
-        scale: 1.1,
-        zIndex: 1,
-        shadow: 15,
-        immediate: (key: string) => key === 'y' || key === 'zIndex',
-      }
-      : {
-        y: order.indexOf(index) * 40,
-        scale: 1,
-        zIndex: 0,
-        shadow: 1,
-        immediate: false,
-      }
+const fn = (order: number[], active = false, originalIndex = 0, curIndex = 0, y = 0) => (index: number) => {
+  if (active && index === originalIndex) {
+    const newY = curIndex * 40 + y;
+
+    return {
+      y: newY < 0 ? 0 : newY > order.length * 40 ? order.length * 40 : newY,
+      scale: 1.1,
+      zIndex: 1,
+      shadow: 15,
+      immediate: (key: string) => key === 'y' || key === 'zIndex',
+    }
+  }
+
+  return {
+    y: order.indexOf(index) * 40,
+    scale: 1,
+    zIndex: 0,
+    shadow: 1,
+    immediate: false,
+  }
+}
 
 
 const Element = ({ atom }: { atom: PrimitiveAtom<{ title: string }> }) => {
@@ -46,17 +50,18 @@ function DraggableList({ items: _items }: { items: PrimitiveAtom<{ title: string
   // Create springs, each corresponds to an item, controlling its transform, scale, etc.
   const [springs, api] = useSprings(items.length, fn(order.current))
 
-  const bind = useDrag(({ args: [originalIndex], active, movement: [, y] }) => {
-    const curIndex = order.current.indexOf(originalIndex)
-    const curRow = clamp(Math.round(y / 40) + curIndex, 0, items.length - 1)
-    const newOrder = swap(order.current, curIndex, curRow)
+  const bind = useDrag(
+    ({ args: [originalIndex], active, movement: [, y] }) => {
+      const curIndex = order.current.indexOf(originalIndex)
+      const curRow = clamp(Math.round(y / 40) + curIndex, 0, items.length - 1)
+      const newOrder = swap(order.current, curIndex, curRow)
 
-    // Feed springs new style data, they'll animate the view without causing a single render
-    api.start(fn(newOrder, active, originalIndex, curIndex, y))
+      // Feed springs new style data, they'll animate the view without causing a single render
+      api.start(fn(newOrder, active, originalIndex, curIndex, y))
 
-    if (!active) order.current = newOrder
-  }, {
-  })
+      if (!active) order.current = newOrder
+    }
+  )
 
   return (
     <div className={'content'} style={{ height: items.length * 50 }}>
