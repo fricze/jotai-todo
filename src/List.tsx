@@ -35,11 +35,13 @@ const Element = ({ atom }: { atom: PrimitiveAtom<{ title: string }> }) => {
 }
 
 function DraggableList({ items: _items }: { items: PrimitiveAtom<{ title: string }>[] }) {
-  // Store indicies as a local ref, this represents the item order
   const [items, setItems] = useState(_items)
+  // Store indicies as a local ref, this represents the item order
   const order = useRef(_items.map((_, index) => index))
 
   useEffect(() => {
+    // synchronize order of elements with current list of elements
+    // do not like it
     if (_items.length > order.current.length) {
       order.current.push(order.current.length)
     }
