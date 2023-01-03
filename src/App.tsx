@@ -22,7 +22,6 @@ const todosAtom = atom<PrimitiveAtom<TodoItem>[]>([
   atom({ title: 'help me plska' }),
 ])
 
-
 const filteredAtom = atom<PrimitiveAtom<TodoItem>[]>((get) => {
   const filter = get(filterAtom)
   const todos = get(todosAtom)
@@ -82,10 +81,22 @@ const Filter = () => {
 type FilteredType = {
   remove: RemoveFn
 }
+
+const Legend = () => {
+  return <div className="legend">
+    {[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(
+      hour => <div className="hour-row">{hour > 12 ? `${hour - 12} PM` : `${hour} AM`}</div>
+    )}
+  </div>
+}
+
 const Filtered = (props: FilteredType) => {
   const [todos] = useAtom(filteredAtom)
 
-  return <List items={todos} />
+  return <div style={{ display: 'flex', flexDirection: 'row' }}>
+    <Legend />
+    <List items={todos} />
+  </div>
 
   // const transitions = useTransition(todos, {
   //   keys: (todo) => todo.toString(),
