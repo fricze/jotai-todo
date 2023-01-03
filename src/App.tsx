@@ -16,11 +16,9 @@ type TodoFilter = 'all' | 'completed' | 'incompleted'
 
 const filterAtom = atom<TodoFilter>('all')
 
-const todosAtom = atom<PrimitiveAtom<TodoItem>[]>([
-  atom({ title: 'hello girls' }),
-  atom({ title: 'how are you???' }),
-  atom({ title: 'help me plska' }),
-])
+const todosAtom = atom<PrimitiveAtom<TodoItem>[]>(new Array(10)
+  .fill(0)
+  .map((_, idx) => atom({ title: `event ${idx}` })))
 
 const filteredAtom = atom<PrimitiveAtom<TodoItem>[]>((get) => {
   const filter = get(filterAtom)

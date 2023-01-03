@@ -6,29 +6,28 @@ import swap from 'lodash-move'
 import { PrimitiveAtom, useAtom } from 'jotai'
 
 const fn =
-  (order: number[], active = false, originalIndex = 0, curIndex = 0, y = 0) =>
-    (index: number) =>
-      active && index === originalIndex
-        ? {
-          y: curIndex * 40 + y,
-          scale: 1.1,
-          zIndex: 1,
-          shadow: 15,
-          immediate: (key: string) => key === 'y' || key === 'zIndex',
-        }
-        : {
-          y: order.indexOf(index) * 40,
-          scale: 1,
-          zIndex: 0,
-          shadow: 1,
-          immediate: false,
-        }
+  (order: number[], active = false, originalIndex = 0, curIndex = 0, y = 0) => (index: number) =>
+    active && index === originalIndex
+      ? {
+        y: curIndex * 40 + y,
+        scale: 1.1,
+        zIndex: 1,
+        shadow: 15,
+        immediate: (key: string) => key === 'y' || key === 'zIndex',
+      }
+      : {
+        y: order.indexOf(index) * 40,
+        scale: 1,
+        zIndex: 0,
+        shadow: 1,
+        immediate: false,
+      }
 
 
 const Element = ({ atom }: { atom: PrimitiveAtom<{ title: string }> }) => {
   const [item] = useAtom(atom)
 
-  return <div>{item.title}</div>
+  return <div className="event-name">{item.title}</div>
 }
 
 function DraggableList({ items: _items }: { items: PrimitiveAtom<{ title: string }>[] }) {
@@ -49,13 +48,14 @@ function DraggableList({ items: _items }: { items: PrimitiveAtom<{ title: string
 
   const bind = useDrag(({ args: [originalIndex], active, movement: [, y] }) => {
     const curIndex = order.current.indexOf(originalIndex)
-    const curRow = clamp(Math.round((curIndex * 100 + y) / 100), 0, items.length - 1)
+    const curRow = clamp(Math.round(y / 40) + curIndex, 0, items.length - 1)
     const newOrder = swap(order.current, curIndex, curRow)
 
     // Feed springs new style data, they'll animate the view without causing a single render
     api.start(fn(newOrder, active, originalIndex, curIndex, y))
 
     if (!active) order.current = newOrder
+  }, {
   })
 
   return (
