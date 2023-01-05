@@ -33,6 +33,7 @@ input:not([type="checkbox"]) {
     padding: 10px 20px;
     margin-top: 2em;
     margin-bottom: 4em;
+
     background: white;
 }
 
@@ -78,8 +79,7 @@ h1 {
 }
 
 .container {
-    /* cursor: url('https://uploads.codesandbox.io/uploads/user/b3e56831-8b98-4fee-b941-0e27f39883ab/Ad1_-cursor.png') 39 39, */
-    /*   auto; */
+    cursor: url('https://uploads.codesandbox.io/uploads/user/b3e56831-8b98-4fee-b941-0e27f39883ab/Ad1_-cursor.png') 39 39, auto;
     display: flex;
     align-items: center;
     height: 100%;
@@ -95,31 +95,42 @@ h1 {
 .content>div {
     position: absolute;
     width: 200px;
-    height: 40px;
+    height: 36px;
     transform-origin: 50% 50% 0px;
-    border-radius: 5px;
-    color: white;
-    line-height: 40px;
-    padding-left: 32px;
-    font-size: 14.5px;
-    background: lightblue;
     text-transform: uppercase;
     letter-spacing: 2px;
     touch-action: none;
-    background: #ddd;
 }
 
 .legend {
-    border-right: 1px solid #333;
     text-align: right;
 }
 
 .hour-row {
     height: 40px;
     padding: 8px;
+    position: relative;
+}
+
+.hour-row::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 400px;
+    height: 1px;
+    background: #333;
 }
 
 .event-name {
     user-select: none;
     color: #333;
+    background: #ddd;
+    border-radius: 5px;
+    width: 100%;
+    border-left: 4px solid #333;
+    margin: 2px 0;
+    height: 36px;
+    padding: 6px 0;
+    padding-left: 32px;
+    font-size: 10px;
 }
