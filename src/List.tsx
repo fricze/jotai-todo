@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSprings, animated } from '@react-spring/web'
 import { useDrag } from 'react-use-gesture'
 import clamp from 'lodash.clamp'
 import swap from 'lodash-move'
 import { PrimitiveAtom, useAtom } from 'jotai'
+import useResizeObserver from '@react-hook/resize-observer'
+
 import { TodoItem, TodoFilter } from './interfaces';
 import { activeAtom } from './model'
+import { draggedAtom, filteredAtom, todosAtom } from './atoms'
 
 const springFn = (order: number[], active = false, originalIndex = 0, curIndex = 0, y = 0) => (index: number) => {
     if (active && index === originalIndex) {
@@ -31,69 +34,87 @@ const springFn = (order: number[], active = false, originalIndex = 0, curIndex =
 
 type SetActive = (i: TodoItem) => any;
 
-const Element = ({ atom }: { atom: PrimitiveAtom<TodoItem>; }) => {
-    const [active, setActive] = useAtom(activeAtom)
-    const [item] = useAtom(atom)
+const getColor = (item: TodoItem): TodoItem['color'] => item.parent ? getColor(item.parent) : item.color;
 
-    return <div className="event-name" onClick={() => setActive(item)}>{item.title}</div>
+const useSize = (target: RefObject<HTMLElement>) => {
+    const [size, setSize] = useState<DOMRect>()
+
+    useLayoutEffect(() => {
+        setSize(target.current?.getBoundingClientRect())
+    }, [target])
+
+    // Where the magic happens
+    useResizeObserver(target, (entry) => setSize(entry.contentRect))
+    return size
+}
+
+const Element = ({ item }: { item: TodoItem }) => {
+    const elRef = useRef<HTMLDivElement>(null)
+    const size = useSize(elRef)
+
+    const adjustSize = () => {
+        const height = elRef.current?.clientHeight || 0;
+        const diff = (height + 4) % 40;
+
+        if (elRef.current) {
+            const newHeight = height - diff;
+            console.log(newHeight)
+            elRef.current.style.height = `${newHeight}px`;
+        }
+    }
+    /* onClick = {() => setActive(item)} */
+
+    return <div
+        className="event-name"
+        style={{ background: getColor(item) }}
+        onMouseUp={adjustSize}
+        ref={elRef}>
+        <div>
+            {item.title}
+        </div>
+
+        {item.parent ? <div>
+            {/* ↑ {item?.parent.substring(0, 6)} */}
+            ↑ {item?.parent?.title}
+        </div> : <div />}
+    </div>
 };
 
-function DraggableList({ items: _items }: { items: PrimitiveAtom<TodoItem>[]; }) {
-    const [items, setItems] = useState(_items)
-    // Store indicies as a local ref, this represents the item order
-    const order = useRef(_items.map((_, index) => index))
+function move(arr: any[], from: number, to: number) {
+    arr.splice(to, 0, arr.splice(from, 1)[0]);
 
-    useEffect(() => {
-        // synchronize order of elements with current list of elements
-        // do not like it
-        if (_items.length > order.current.length) {
-            order.current.push(order.current.length)
-        }
+    return arr;
+};
 
-        setItems(_items)
-    }, [_items])
-
-    // Create springs, each corresponds to an item, controlling its transform, scale, etc.
-    const [springs, api] = useSprings(items.length, springFn(order.current))
-
-    const bind = useDrag(
-        ({ args: [originalIndex], active, movement: [, y] }) => {
-            const curIndex = order.current.indexOf(originalIndex)
-            const curRow = clamp(Math.round(y / 40) + curIndex, 0, items.length - 1)
-            const newOrder = swap(order.current, curIndex, curRow)
-
-            // Feed springs new style data, they'll animate the view without causing a single render
-            api.start(springFn(newOrder, active, originalIndex, curIndex, y))
-
-            if (!active) order.current = newOrder
-        }
-    )
+function DraggableList() {
+    const [todos, setTodos] = useAtom(todosAtom)
+    const [_, setActive] = useAtom(draggedAtom)
 
     return (
-        <div className={'content'} style={{ height: items.length * 50 }}>
-            {springs.map(({ zIndex, shadow, y, scale }, i) => {
+        <div className={'content'} style={{ height: todos.length * 50 }}>
+            {todos.map(({ order }, i) => {
                 return (
                     <animated.div
-                        {...bind(i)}
+                        draggable={true}
                         key={i}
-                        style={{
-                            zIndex,
-                            boxShadow: shadow.to(s => `rgba(0, 0, 0, 0.15) 0px ${s}px ${2 * s}px 0px`),
-                            y,
-                            scale,
+                        onDragStart={e => {
+                            setActive(() => i)
                         }}
-                        children={<Element atom={items[i]} />}
-                    />
+                        style={{
+                            boxShadow: `rgba(0, 0, 0, 0.15) 0px ${1}px ${2 * 1}px 0px`,
+                            y: order * 40,
+                        }}
+                    ><Element item={todos[i]} /></animated.div>
                 )
             })}
         </div>
     )
 }
 
-export function List({ items }: { items: PrimitiveAtom<TodoItem>[] }) {
+export function List() {
     return (
         <div className={'container'}>
-            <DraggableList items={items} />
+            <DraggableList />
         </div>
     )
 }

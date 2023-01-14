@@ -8,26 +8,7 @@ import type { PrimitiveAtom } from 'jotai'
 import { List } from './List'
 import { TodoItem, TodoFilter } from './interfaces'
 import { activeAtom } from './model'
-
-const filterAtom = atom<TodoFilter>('all')
-
-const todosAtom = atom<PrimitiveAtom<TodoItem>[]>(new Array(4)
-    .fill(0)
-    .map((_, idx) => atom({ title: `event ${idx}`, id: crypto.randomUUID() })))
-
-const filteredAtom = atom<PrimitiveAtom<TodoItem>[]>((get) => {
-    const filter = get(filterAtom)
-    const todos = get(todosAtom)
-
-    switch (filter) {
-        case 'all':
-            return todos;
-        case 'completed':
-            return todos.filter((atom) => get(atom).completed)
-        case 'incompleted':
-            return todos.filter((atom) => !get(atom).completed)
-    }
-})
+import { filterAtom, todosAtom, filteredAtom, draggedAtom } from './atoms'
 
 type RemoveFn = (item: PrimitiveAtom<TodoItem>) => void
 type TodoItemProps = {
@@ -76,19 +57,30 @@ type FilteredType = {
 }
 
 const Legend = () => {
+    const [todos, setTodos] = useAtom(todosAtom)
+    const [active] = useAtom(draggedAtom)
+
     return <div className="legend">
         {[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map(
-            hour => <div className="hour-row">{hour > 12 ? `${hour - 12} PM` : `${hour} AM`}</div>
+            (hour, idx) => <div className="hour-row"
+                onDragEnter={() =>
+                    setTodos(todos => {
+                        todos[active].order = idx;
+
+                        return [...todos]
+                    })
+                }
+            >{hour > 12 ? `${hour - 12} PM` : `${hour} AM`}</div>
         )}
-    </div>
+    </div >
 }
 
 const Filtered = (props: FilteredType) => {
     const [todos] = useAtom(filteredAtom)
 
-    return <div style={{ display: 'flex', flexDirection: 'row' }}>
+    return <div style={{ display: 'flex', flexDirection: 'row', position: 'relative' }}>
         <Legend />
-        <List items={todos} />
+        <List />
     </div>
 
     // const transitions = useTransition(todos, {
@@ -117,12 +109,19 @@ const TodoList = () => {
         e.preventDefault()
         const title = e.currentTarget.value
         e.currentTarget.value = ''
-        setTodos((prev) => [...prev, atom<TodoItem>({ title, completed: false, id: crypto.randomUUID() })])
+
+        const newTodo = atom<TodoItem>({
+            title, completed: false, id: crypto.randomUUID(),
+            ...active ? { parent: active } : {},
+            color: "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0")
+        });
+        setTodos((prev) => [...prev, newTodo])
     }
 
     return (
         <form>
             {active ? <div>{active.title}</div> : <div />}
+
             <Filter />
             <input name="newTodo" placeholder="Type ..."
                 onKeyPress={function handleKeyPress(e) {

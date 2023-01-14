@@ -84,6 +84,7 @@ h1 {
     align-items: center;
     height: 100%;
     justify-content: center;
+    margin-left: 60px;
 }
 
 .content {
@@ -103,7 +104,8 @@ h1 {
 }
 
 .legend {
-    text-align: right;
+    position: absolute;
+    width: 100%;
 }
 
 .hour-row {
@@ -122,6 +124,8 @@ h1 {
 }
 
 .event-name {
+    resize: vertical;
+    overflow: auto;
     user-select: none;
     color: #333;
     background: #ddd;
