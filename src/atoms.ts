@@ -1,6 +1,7 @@
 import { Provider, atom, useAtom } from 'jotai'
 import type { PrimitiveAtom } from 'jotai'
 import { TodoItem, TodoFilter } from './interfaces'
+import { splitAtom } from 'jotai/utils'
 
 export const draggedAtom = atom<number>(-1)
 
@@ -13,7 +14,10 @@ export const todosAtom = atom<TodoItem[]>(new Array(4)
     id: crypto.randomUUID(),
     color: "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0"),
     order: idx,
+    duration: 30,
   })))
+
+export const splitTodos = splitAtom(todosAtom)
 
 export const filteredAtom = atom<TodoItem[]>((get) => {
   const filter = get(filterAtom)

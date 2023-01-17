@@ -3,12 +3,13 @@ import { useSprings, animated } from '@react-spring/web'
 import { useDrag } from 'react-use-gesture'
 import clamp from 'lodash.clamp'
 import swap from 'lodash-move'
-import { PrimitiveAtom, useAtom } from 'jotai'
+import { atom, PrimitiveAtom, useAtom } from 'jotai'
 import useResizeObserver from '@react-hook/resize-observer'
 
 import { TodoItem, TodoFilter } from './interfaces';
 import { activeAtom } from './model'
-import { draggedAtom, filteredAtom, todosAtom } from './atoms'
+import { draggedAtom, filteredAtom, splitTodos, todosAtom } from './atoms'
+import { useAtomValue, useUpdateAtom } from 'jotai/utils'
 
 const springFn = (order: number[], active = false, originalIndex = 0, curIndex = 0, y = 0) => (index: number) => {
     if (active && index === originalIndex) {
@@ -48,26 +49,33 @@ const useSize = (target: RefObject<HTMLElement>) => {
     return size
 }
 
-const Element = ({ item }: { item: TodoItem }) => {
+const onMouseUpAtom = atom([ () => {} ])
+
+const Element = ({ atom }: { atom: PrimitiveAtom<TodoItem> }) => {
+    const [ item, setItem ] = useAtom(atom)
     const elRef = useRef<HTMLDivElement>(null)
-    const size = useSize(elRef)
+    const setOnMouseUp = useUpdateAtom(onMouseUpAtom)
 
     const adjustSize = () => {
         const height = elRef.current?.clientHeight || 0;
-        const diff = (height + 4) % 40;
+        const value = Math.round((height + 4) / 40)
 
-        if (elRef.current) {
-            const newHeight = height - diff;
-            console.log(newHeight)
-            elRef.current.style.height = `${newHeight}px`;
-        }
+        setItem(i => ({
+            ...i,
+            color: "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0"),
+            duration: value * 30,
+        }))
     }
-    /* onClick = {() => setActive(item)} */
+
+    const height = ((item.duration || 0) / 30 * 40) - 4;
+
 
     return <div
         className="event-name"
-        style={{ background: getColor(item) }}
-        onMouseUp={adjustSize}
+        style={{ background: getColor(item), height }}
+        onMouseDown={e => {
+            setOnMouseUp([() => { adjustSize(); setOnMouseUp([() => {}]) }])
+        }}
         ref={elRef}>
         <div>
             {item.title}
@@ -86,9 +94,30 @@ function move(arr: any[], from: number, to: number) {
     return arr;
 };
 
+export const useWindowEvents = (events: string[], callback: EventListenerOrEventListenerObject): void => {
+    useEffect(() => {
+        // Bind the event listener
+        events.forEach(event => {
+            window.addEventListener(event, callback);
+        });
+
+        return () => {
+            // Unbind the event listener on clean up
+            events.forEach(event => {
+                window.removeEventListener(event, callback);
+            });
+        };
+    });
+};
+
 function DraggableList() {
-    const [todos, setTodos] = useAtom(todosAtom)
-    const [_, setActive] = useAtom(draggedAtom)
+    const [todos, _] = useAtom(todosAtom)
+    const [split, __] = useAtom(splitTodos)
+    const [___, setActive] = useAtom(draggedAtom)
+
+    const [ onMouseUp ] = useAtomValue(onMouseUpAtom)
+
+    useWindowEvents(['mouseup'], onMouseUp)
 
     return (
         <div className={'content'} style={{ height: todos.length * 50 }}>
@@ -104,7 +133,7 @@ function DraggableList() {
                             boxShadow: `rgba(0, 0, 0, 0.15) 0px ${1}px ${2 * 1}px 0px`,
                             y: order * 40,
                         }}
-                    ><Element item={todos[i]} /></animated.div>
+                    ><Element atom={split[i]} /></animated.div>
                 )
             })}
         </div>

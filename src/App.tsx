@@ -10,36 +10,37 @@ import { TodoItem, TodoFilter } from './interfaces'
 import { activeAtom } from './model'
 import { filterAtom, todosAtom, filteredAtom, draggedAtom } from './atoms'
 
-type RemoveFn = (item: PrimitiveAtom<TodoItem>) => void
-type TodoItemProps = {
-    atom: PrimitiveAtom<TodoItem>;
-    remove: RemoveFn;
-}
+type RemoveFn = (item: TodoItem) => void
 
-const TodoView = ({ atom, remove }: TodoItemProps) => {
-    const [item, setItem] = useAtom(atom)
-    const toggleCompleted = () =>
-        setItem((props) => ({ ...props, completed: !props.completed }))
-
-    return (
-        <>
-            <input
-                type="checkbox"
-                checked={item.completed}
-                onChange={toggleCompleted}
-            />
-            <span style={{ textDecoration: item.completed ? 'line-through' : '' }}>
-                {item.title}
-            </span>
-            <button onClick={(e) => {
-                e.preventDefault()
-                remove(atom)
-            }}>
-                <CloseOutlined />
-            </button>
-        </>
-    )
-}
+/* type TodoItemProps = {
+*     atom: PrimitiveAtom<TodoItem>;
+*     remove: RemoveFn;
+* }
+* 
+* const TodoView = ({ atom, remove }: TodoItemProps) => {
+*     const [item, setItem] = useAtom(atom)
+*     const toggleCompleted = () =>
+*         setItem((props) => ({ ...props, completed: !props.completed }))
+* 
+*     return (
+*         <>
+*             <input
+*                 type="checkbox"
+*                 checked={item.completed}
+*                 onChange={toggleCompleted}
+*             />
+*             <span style={{ textDecoration: item.completed ? 'line-through' : '' }}>
+*                 {item.title}
+*             </span>
+*             <button onClick={(e) => {
+*                 e.preventDefault()
+*                 remove(atom)
+*             }}>
+*                 <CloseOutlined />
+*             </button>
+*         </>
+*     )
+* } */
 
 const Filter = () => {
     const [filter, set] = useAtom(filterAtom)
@@ -78,7 +79,8 @@ const Legend = () => {
 const Filtered = (props: FilteredType) => {
     const [todos] = useAtom(filteredAtom)
 
-    return <div style={{ display: 'flex', flexDirection: 'row', position: 'relative' }}>
+    return <div
+        style={{ display: 'flex', flexDirection: 'row', position: 'relative' }}>
         <Legend />
         <List />
     </div>
@@ -100,21 +102,24 @@ const Filtered = (props: FilteredType) => {
 const TodoList = () => {
     const [active, setActive] = useAtom(activeAtom)
 
-    const setTodos = useUpdateAtom(todosAtom)
+    const [todos, setTodos] = useAtom(todosAtom)
 
-    const remove: RemoveFn = (todo) =>
-        setTodos((prev) => prev.filter((item) => item !== todo))
+    const remove: RemoveFn = (todo: TodoItem) =>
+        setTodos((prev) => prev.filter((item) => item.id !== todo.id))
 
     const add = (e: FormEvent<HTMLInputElement>) => {
         e.preventDefault()
         const title = e.currentTarget.value
         e.currentTarget.value = ''
 
-        const newTodo = atom<TodoItem>({
+        const newTodo: TodoItem = {
             title, completed: false, id: crypto.randomUUID(),
             ...active ? { parent: active } : {},
-            color: "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0")
-        });
+            color: "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0"),
+            duration: 30,
+            order: todos.length
+        };
+
         setTodos((prev) => [...prev, newTodo])
     }
 
