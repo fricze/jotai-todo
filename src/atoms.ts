@@ -7,7 +7,7 @@ export const draggedAtom = atom<number>(-1)
 
 export const filterAtom = atom<TodoFilter>('all')
 
-export const todosAtom = atom<TodoItem[]>(new Array(4)
+const initialValue = new Array(4)
   .fill(0)
   .map((_, idx) => ({
     title: `event ${idx}`,
@@ -15,7 +15,9 @@ export const todosAtom = atom<TodoItem[]>(new Array(4)
     color: "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0"),
     order: idx,
     duration: 30,
-  })))
+  }))
+
+export const todosAtom = atom<TodoItem[]>(initialValue)
 
 export const splitTodos = splitAtom(todosAtom)
 

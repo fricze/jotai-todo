@@ -10,7 +10,7 @@ export interface TodoItem {
   parent?: TodoItem;
   color?: string;
   start?: TodoDate;
-  duration?: Minutes;
+  duration: Minutes;
   active?: boolean;
 }
 
